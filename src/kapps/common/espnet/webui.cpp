@@ -41,40 +41,39 @@ static uint32_t s_last_http_ms;
 static uint32_t s_last_mdns_ms;
 
 static const char LOGIN_HTML[] PROGMEM =
-	"<!doctype html><html><head><meta charset=utf-8><title>ESPNET login</title>"
-	"<style>body{font:16px sans-serif;max-width:22em;margin:3em auto;background:#111;color:#ddd}"
-	"input{width:100%;padding:.4em;margin:.3em 0;box-sizing:border-box}"
-	"button{padding:.5em 1em}</style></head><body>"
-	"<h2>ESPNET</h2><form method=post action=/login>"
-	"<input name=u placeholder=user autofocus>"
-	"<input name=p type=password placeholder=password>"
-	"<button>Log in</button></form>"
-	"<p style=color:#888>Default espnet / espnet</p></body></html>";
+  "<!doctype html><html><head><meta charset=utf-8><title>ESPNET login</title>"
+  "<style>body{font:16px sans-serif;max-width:22em;margin:3em auto;background:#111;color:#ddd}"
+  "input{width:100%;padding:.4em;margin:.3em 0;box-sizing:border-box}"
+  "button{padding:.5em 1em}</style></head><body>"
+  "<h2>ESPNET</h2><form method=post action=/login>"
+  "<input name=u placeholder=user autofocus>"
+  "<input name=p type=password placeholder=password>"
+  "<button>Log in</button></form>"
+  "<p style=color:#888>Default espnet / espnet</p></body></html>";
 
 static const char ROOT_HTML[] PROGMEM =
-	"<!doctype html><html><head><meta charset=utf-8><title>ESPNET</title>"
-	"<style>body{font:14px/1.35 sans-serif;background:#111;color:#ddd;margin:1em}"
-	"pre{background:#000;padding:.6em;white-space:pre-wrap}"
-	"a{color:#8cf}</style></head><body>"
-	"<h2>ESPNET</h2>"
-	"<p><a href=/log>log</a> &nbsp; "
-	"<form style=display:inline method=post action=/clear>"
-	"<button>clear log</button></form></p>"
-	"<pre id=s>idle poll, wait...</pre>"
-	"<script>"
-	"(function(){"
-	"function t(){"
-	"fetch('/stat',{cache:'no-store'}).then(function(r){if(!r.ok)throw 1;return r.text()})"
-	".then(function(x){document.getElementById('s').textContent=x;setTimeout(t,3000)})"
-	".catch(function(){document.getElementById('s').textContent+='\\n[poll paused ? ZX busy or WiFi]';"
-	"setTimeout(t,8000)});"
-	"}"
-	"t();"
-	"})();"
-	"</script></body></html>";
+  "<!doctype html><html><head><meta charset=utf-8><title>ESPNET</title>"
+  "<style>body{font:14px/1.35 sans-serif;background:#111;color:#ddd;margin:1em}"
+  "pre{background:#000;padding:.6em;white-space:pre-wrap}"
+  "a{color:#8cf}</style></head><body>"
+  "<h2>ESPNET</h2>"
+  "<p><a href=/log>log</a> &nbsp; "
+  "<form style=display:inline method=post action=/clear>"
+  "<button>clear log</button></form></p>"
+  "<pre id=s>idle poll, wait...</pre>"
+  "<script>"
+  "(function(){"
+  "function t(){"
+  "fetch('/stat',{cache:'no-store'}).then(function(r){if(!r.ok)throw 1;return r.text()})"
+  ".then(function(x){document.getElementById('s').textContent=x;setTimeout(t,3000)})"
+  ".catch(function(){document.getElementById('s').textContent+='\\n[poll paused ? ZX busy or WiFi]';"
+  "setTimeout(t,8000)});"
+  "}"
+  "t();"
+  "})();"
+  "</script></body></html>";
 
-int webui_ota_active(void)
-{
+int webui_ota_active(void) {
 	if (s_ota)
 		return 1;
 #if defined(ARDUINO_ARCH_ESP8266) || defined(ARDUINO_ARCH_ESP32)
@@ -84,8 +83,7 @@ int webui_ota_active(void)
 	return 0;
 }
 
-static uint32_t new_sid(void)
-{
+static uint32_t new_sid(void) {
 	uint32_t v;
 #if defined(ARDUINO_ARCH_ESP32)
 	v = esp_random();
@@ -97,14 +95,12 @@ static uint32_t new_sid(void)
 	return v;
 }
 
-static void hdr_close(void)
-{
+static void hdr_close(void) {
 	s_http.sendHeader("Connection", "close");
 	s_http.sendHeader("Cache-Control", "no-store");
 }
 
-static int cookie_sid_ok(void)
-{
+static int cookie_sid_ok(void) {
 	String c = s_http.header("Cookie");
 	int i;
 	unsigned long got;
@@ -118,17 +114,14 @@ static int cookie_sid_ok(void)
 	return (uint32_t)got == s_sid;
 }
 
-static void send_login(int code)
-{
+static void send_login(int code) {
 	hdr_close();
 	s_http.send_P(code, "text/html", LOGIN_HTML);
 }
 
-static void handle_login(void)
-{
+static void handle_login(void) {
 	if (s_http.method() == HTTP_POST) {
-		if (s_http.arg("u") == ESPNET_WEB_USER &&
-		    s_http.arg("p") == ESPNET_WEB_PASS) {
+		if (s_http.arg("u") == ESPNET_WEB_USER && s_http.arg("p") == ESPNET_WEB_PASS) {
 			char setc[48];
 			s_sid = new_sid();
 			snprintf(setc, sizeof(setc), "sid=%lu; Path=/", (unsigned long)s_sid);
@@ -144,37 +137,33 @@ static void handle_login(void)
 	send_login(200);
 }
 
-static int need_auth(void)
-{
+static int need_auth(void) {
 	if (cookie_sid_ok())
 		return 0;
 	send_login(401);
 	return 1;
 }
 
-static const char *wifi_name(uint8_t st)
-{
+static const char *wifi_name(uint8_t st) {
 	switch (st) {
-	case ESPNET_WIFI_GOT_IP: return "GOT_IP";
-	case ESPNET_WIFI_CONNECTING: return "connecting";
-	case ESPNET_WIFI_AP: return "AP";
-	default: return "idle";
+		case ESPNET_WIFI_GOT_IP: return "GOT_IP";
+		case ESPNET_WIFI_CONNECTING: return "connecting";
+		case ESPNET_WIFI_AP: return "AP";
+		default: return "idle";
 	}
 }
 
-static const char *sock_st_name(uint8_t st)
-{
+static const char *sock_st_name(uint8_t st) {
 	switch (st) {
-	case 1: return "idle";
-	case 2: return "tcp";
-	case 3: return "udp";
-	case 4: return "listen";
-	default: return "free";
+		case 1: return "idle";
+		case 2: return "tcp";
+		case 3: return "udp";
+		case 4: return "listen";
+		default: return "free";
 	}
 }
 
-static int fill_stat(char *dst, int cap)
-{
+static int fill_stat(char *dst, int cap) {
 	const EspnetStats *st;
 	SockView sv[ESPNET_MAX_SOCKS];
 	uint8_t ns = 0;
@@ -193,51 +182,51 @@ static int fill_stat(char *dst, int cap)
 	wifi_fill_ip(ip);
 	wifi_fill_ssid(ssid);
 	n = snprintf(dst, (size_t)cap,
-		"ESPNET %u.%u  up %lus  heap %u  ota %u\n"
-		"busy %u  in_frame %u\n"
-		"WiFi %s rssi %d  %s  %u.%u.%u.%u\n"
-		"UART %s %lu baud  ZX rx %lu tx %lu  last %lums\n"
-		"WiFi rx %lu tx %lu  last rx %lums tx %lums\n"
-		"cmds %lu ok %lu err %lu eagain %lu resync %lu cts_wait %lu\n"
-		"last %s sock %u seq %u %s n=%u plen=%u  %lums ago\n"
-		"OTA: %s.local  pass %s  (close this page while flashing)\n\n"
-		"sockets\n",
-		(unsigned)ESPNET_VER_MAJOR, (unsigned)ESPNET_VER_MINOR,
-		(unsigned long)(now / 1000u),
-		(unsigned)ESP.getFreeHeap(),
-		(unsigned)s_ota,
-		(unsigned)st->busy,
-		(unsigned)espnet_rx_in_frame(),
-		wifi_name(wifi_status_code()),
-		(int)wifi_rssi_val(),
-		(char *)ssid,
-		(unsigned)ip[0], (unsigned)ip[1], (unsigned)ip[2], (unsigned)ip[3],
-		ESPNET_UART_LAYOUT_STR,
-		(unsigned long)host_uart_baud(),
-		(unsigned long)st->uart_rx, (unsigned long)st->uart_tx,
-		(unsigned long)(st->last_uart_ms ? (now - st->last_uart_ms) : 0),
-		(unsigned long)st->wifi_rx, (unsigned long)st->wifi_tx,
-		st->last_wifi_rx_ms ? (unsigned long)(now - st->last_wifi_rx_ms) : 0UL,
-		st->last_wifi_tx_ms ? (unsigned long)(now - st->last_wifi_tx_ms) : 0UL,
-		(unsigned long)st->cmds, (unsigned long)st->cmds_ok,
-		(unsigned long)st->cmds_err, (unsigned long)st->cmds_eagain,
-		(unsigned long)st->uart_resync, (unsigned long)st->tx_wait,
-		stats_cmd_name(st->last_cmd),
-		(unsigned)st->last_sock, (unsigned)st->last_seq,
-		stats_err_name(st->last_status),
-		(unsigned)st->last_result, (unsigned)st->last_plen,
-		st->last_cmd_ms ? (unsigned long)(now - st->last_cmd_ms) : 0UL,
-		ESPNET_OTA_HOSTNAME, ESPNET_WEB_PASS);
+	             "ESPNET %u.%u  up %lus  heap %u  ota %u\n"
+	             "busy %u  in_frame %u\n"
+	             "WiFi %s rssi %d  %s  %u.%u.%u.%u\n"
+	             "UART %s %lu baud  ZX rx %lu tx %lu  last %lums\n"
+	             "WiFi rx %lu tx %lu  last rx %lums tx %lums\n"
+	             "cmds %lu ok %lu err %lu eagain %lu resync %lu cts_wait %lu\n"
+	             "last %s sock %u seq %u %s n=%u plen=%u  %lums ago\n"
+	             "OTA: %s.local  pass %s  (close this page while flashing)\n\n"
+	             "sockets\n",
+	             (unsigned)ESPNET_VER_MAJOR, (unsigned)ESPNET_VER_MINOR,
+	             (unsigned long)(now / 1000u),
+	             (unsigned)ESP.getFreeHeap(),
+	             (unsigned)s_ota,
+	             (unsigned)st->busy,
+	             (unsigned)espnet_rx_in_frame(),
+	             wifi_name(wifi_status_code()),
+	             (int)wifi_rssi_val(),
+	             (char *)ssid,
+	             (unsigned)ip[0], (unsigned)ip[1], (unsigned)ip[2], (unsigned)ip[3],
+	             ESPNET_UART_LAYOUT_STR,
+	             (unsigned long)host_uart_baud(),
+	             (unsigned long)st->uart_rx, (unsigned long)st->uart_tx,
+	             (unsigned long)(st->last_uart_ms ? (now - st->last_uart_ms) : 0),
+	             (unsigned long)st->wifi_rx, (unsigned long)st->wifi_tx,
+	             st->last_wifi_rx_ms ? (unsigned long)(now - st->last_wifi_rx_ms) : 0UL,
+	             st->last_wifi_tx_ms ? (unsigned long)(now - st->last_wifi_tx_ms) : 0UL,
+	             (unsigned long)st->cmds, (unsigned long)st->cmds_ok,
+	             (unsigned long)st->cmds_err, (unsigned long)st->cmds_eagain,
+	             (unsigned long)st->uart_resync, (unsigned long)st->tx_wait,
+	             stats_cmd_name(st->last_cmd),
+	             (unsigned)st->last_sock, (unsigned)st->last_seq,
+	             stats_err_name(st->last_status),
+	             (unsigned)st->last_result, (unsigned)st->last_plen,
+	             st->last_cmd_ms ? (unsigned long)(now - st->last_cmd_ms) : 0UL,
+	             ESPNET_OTA_HOSTNAME, ESPNET_WEB_PASS);
 	if (n < 0)
 		n = 0;
 	if (n >= cap)
 		n = cap - 1;
 	for (i = 0; i < ns && n < cap - 48; i++) {
 		int w = snprintf(dst + n, (size_t)(cap - n),
-				 " %u %s proto=%u conn=%u av=%u rx=%u\n",
-				 (unsigned)i, sock_st_name(sv[i].state),
-				 (unsigned)sv[i].proto, (unsigned)sv[i].conn,
-				 (unsigned)sv[i].avail, (unsigned)sv[i].rx_len);
+		                 " %u %s proto=%u conn=%u av=%u rx=%u\n",
+		                 (unsigned)i, sock_st_name(sv[i].state),
+		                 (unsigned)sv[i].proto, (unsigned)sv[i].conn,
+		                 (unsigned)sv[i].avail, (unsigned)sv[i].rx_len);
 		if (w > 0)
 			n += w;
 	}
@@ -258,16 +247,14 @@ static int fill_stat(char *dst, int cap)
 	return n;
 }
 
-static void handle_root(void)
-{
+static void handle_root(void) {
 	if (need_auth())
 		return;
 	hdr_close();
 	s_http.send_P(200, "text/html", ROOT_HTML);
 }
 
-static void handle_stat(void)
-{
+static void handle_stat(void) {
 	static char buf[1400];
 
 	if (need_auth())
@@ -277,8 +264,7 @@ static void handle_stat(void)
 	s_http.send(200, "text/plain; charset=utf-8", buf);
 }
 
-static void handle_log(void)
-{
+static void handle_log(void) {
 	static char buf[1600];
 	unsigned i;
 	unsigned nlog;
@@ -295,7 +281,7 @@ static void handle_log(void)
 	buf[0] = 0;
 	for (i = start; i < nlog && n < (int)sizeof(buf) - 8; i++) {
 		int w = snprintf(buf + n, sizeof(buf) - (size_t)n, "%s\n",
-				 stats_log_line(i));
+		                 stats_log_line(i));
 		if (w > 0)
 			n += w;
 	}
@@ -303,8 +289,7 @@ static void handle_log(void)
 	s_http.send(200, "text/plain; charset=utf-8", buf);
 }
 
-static void handle_clear(void)
-{
+static void handle_clear(void) {
 	if (need_auth())
 		return;
 	slog_clear();
@@ -314,20 +299,17 @@ static void handle_clear(void)
 	s_http.send(302, "text/plain", "ok");
 }
 
-static void handle_favicon(void)
-{
+static void handle_favicon(void) {
 	hdr_close();
 	s_http.send(204, "text/plain", "");
 }
 
-static void handle_404(void)
-{
+static void handle_404(void) {
 	hdr_close();
 	s_http.send(404, "text/plain", "no");
 }
 
-static void ota_begin(void)
-{
+static void ota_begin(void) {
 	s_ota = 1;
 	sockets_close_all();
 	if (s_http_live)
@@ -340,8 +322,7 @@ static void ota_begin(void)
 	slog("OTA start - http/sockets off");
 }
 
-static void ota_end(void)
-{
+static void ota_end(void) {
 	s_ota = 0;
 #if defined(ARDUINO_ARCH_ESP32)
 	WiFi.setAutoReconnect(true);
@@ -353,12 +334,15 @@ static void ota_end(void)
 	slog("OTA done");
 }
 
-static void start_services(void)
-{
+static void start_services(void) {
 	ArduinoOTA.setHostname(ESPNET_OTA_HOSTNAME);
 	ArduinoOTA.setPassword(ESPNET_WEB_PASS);
-	ArduinoOTA.onStart([]() { ota_begin(); });
-	ArduinoOTA.onEnd([]() { ota_end(); });
+	ArduinoOTA.onStart([]() {
+		ota_begin();
+	});
+	ArduinoOTA.onEnd([]() {
+		ota_end();
+	});
 	ArduinoOTA.onError([](ota_error_t e) {
 		s_ota = 0;
 #if defined(ARDUINO_ARCH_ESP32)
@@ -375,8 +359,7 @@ static void start_services(void)
 	slog("OTA on (http off, USB AT+WEB to enable)");
 }
 
-static void start_http(void)
-{
+static void start_http(void) {
 #if defined(ARDUINO_ARCH_ESP32)
 	const char *hdrs[] = { "Cookie" };
 
@@ -397,29 +380,25 @@ static void start_http(void)
 	slog("web http://%s.local/", ESPNET_OTA_HOSTNAME);
 }
 
-void webui_http_enable(void)
-{
+void webui_http_enable(void) {
 	if (!s_up || s_http_live)
 		return;
 	start_http();
 }
 
-void webui_begin_log(void)
-{
+void webui_begin_log(void) {
 	stats_begin();
 	slog("boot ESPNET %u.%u heap %u",
 	     (unsigned)ESPNET_VER_MAJOR, (unsigned)ESPNET_VER_MINOR,
 	     (unsigned)ESP.getFreeHeap());
 }
 
-static int wifi_ready(void)
-{
+static int wifi_ready(void) {
 	IPAddress ip = WiFi.localIP();
 	return (WiFi.status() == WL_CONNECTED && (ip[0] | ip[1] | ip[2] | ip[3])) ? 1 : 0;
 }
 
-void webui_poll(void)
-{
+void webui_poll(void) {
 	const EspnetStats *st;
 	uint32_t now;
 
@@ -455,7 +434,7 @@ void webui_poll(void)
 		goto mdns_only;
 	s_last_http_ms = now;
 	s_http.handleClient();
-mdns_only:
+mdns_only:;
 #if defined(ARDUINO_ARCH_ESP8266)
 	if ((now - s_last_mdns_ms) > 1000u) {
 		s_last_mdns_ms = now;

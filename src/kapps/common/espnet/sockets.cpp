@@ -538,7 +538,7 @@ static uint16_t do_accept(const uint8_t *req, uint8_t *rsp)
 	id = find_free();
 	if (id < 0)
 		return rsp_err(rsp, ESPNET_CMD_ACCEPT, sock, seq, ESPNET_ERR_EAGAIN);
-	c = s_slot[sock].srv->available();
+	c = s_slot[sock].srv->accept();
 	if (!c)
 		return rsp_err(rsp, ESPNET_CMD_ACCEPT, sock, seq, ESPNET_ERR_EAGAIN);
 	s_slot[id].proto = ESPNET_SOCK_STREAM;
@@ -586,7 +586,7 @@ static uint16_t do_read(const uint8_t *req, uint16_t req_n, uint8_t *rsp)
 		if (n > 0)
 			stats_wifi_rx(n);
 		if (pkt > (int)n)
-			s->udp.flush();
+			s->udp.clear();
 		if (n == 0)
 			return rsp_err(rsp, ESPNET_CMD_READ, sock, seq, ESPNET_ERR_EAGAIN);
 		return rsp_hdr(rsp, ESPNET_CMD_READ, sock, 0, seq, n,
