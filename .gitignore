@@ -1,0 +1,13 @@
+tools/aspp
+tools/dmimg
+tools/sjasmplus
+tools/src/aspp/build/
+tools/src/dmimg/dmimg
+tools/src/sjasmplus/build/
+tools/src/sjasmplus/sjasmplus
+iar/
+src/_sdk/nedopad.bin
+src/_sdk/nedores.bin
+src/_sdk/nedotrd.bin
+src/fatfs4os/list/
+src/kernel/ffsfunc.asm

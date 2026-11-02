@@ -7,6 +7,15 @@
   * GNU Bash
   * tools/aspp
   * tools/sjasmplus
+  * gcc-multilib
+  * libc6-dev-i386
+  * IAR Workbench for Z80, который используется при сборке на Windows
+  * wine
+
+Перед тем как собирать NedoOS, необходимо собрать инструменты в каталоге
+`../tools` командой `make all`. Также нужно поместить IAR Workbench for Z80 в
+каталог `../iar`. После чего нужно зайти в каталог `./fatfs4os` и выполнить
+сборку командой `wine cmd /c build.bat`.
 
 Запустите `make` с указанием цели сборки.
 
